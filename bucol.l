@@ -17,10 +17,13 @@
 "INPUT" { return INPUT; }
 "PRINT" { return PRINT; }
 "." { return DOT; }
+"?" { return QUESTION_MARK; }
+"+" { return PLUS; }
+"=" {return EQUALS;}
 "X"+ { yylval.str = strdup(yytext); return CAPACITY; }
 [a-zA-Z][a-zA-Z0-9-]* { yylval.str = strdup(yytext); return IDENTIFIER; }
+\".*\" { yylval.str = strdup(yytext); return STRING; }
 [0-9]+ { yylval.num = atoi(yytext); return INTEGER; }
-\"[^"]*\" { yylval.str = strdup(yytext); return STRING; }
 ";" { return SEMICOLON; }
 . { printf("Unknown character: %s\n", yytext); }
 

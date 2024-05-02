@@ -16,7 +16,6 @@ void yyerror(const char *s);
 %token <str> IDENTIFIER
 %token <num> INTEGER
 %token <str> STRING
-%type <str> output
 %token BEGINNING END BODY MOVE ADD TO INPUT PRINT SEMICOLON DOT QUESTION_MARK PLUS EQUALS
 
 %%
@@ -29,43 +28,31 @@ declarations: /* empty string */
             | declarations declaration
             ;
 
-declaration: CAPACITY IDENTIFIER DOT { printf("Declared variable %s with capacity %s\n", $2, $1); free($1); free($2); }
+declaration: CAPACITY IDENTIFIER INTEGER DOT { printf("Declared variable %s with capacity %d\n", $2, $3); free($2); }
             ;
 
 statements: /* empty string */
           | statements statement
           ;
 
-statement: PRINT STRING DOT { printf("Printed string: %s\n", $2); free($2); }
+statement: BEGINNING DOT { printf("Beginning\n"); }
+         | CAPACITY IDENTIFIER DOT { printf("Declared variable %s\n", $2); free($2); }
+         | BODY DOT { printf("Body\n"); }
          | INPUT IDENTIFIER DOT { printf("Input to variable: %s\n", $2); free($2); }
          | MOVE INTEGER TO IDENTIFIER DOT { printf("Moved value to %s\n", $4); free($4); }
          | ADD IDENTIFIER TO IDENTIFIER DOT { printf("Added value to %s\n", $4); free($4); }
-         | PRINT identifiers DOT { printf("Printed values\n"); }
+         | print_statement
+         | END DOT { printf("End\n"); }
+         ;
 
-value: INTEGER { printf("Value is %d\n", $1); }
-     | IDENTIFIER { printf("Value is %s\n", $1); free($1); }
-     ;
+print_statement: PRINT print_items DOT { printf("Printed items\n"); }
+               ;
 
-identifiers: IDENTIFIER { printf("Identifier is %s\n", $1); free($1); }
-           | identifiers SEMICOLON STRING { printf("String is %s\n", $3); free($3); }
-           | identifiers SEMICOLON IDENTIFIER { printf("Identifier is %s\n", $3); free($3); }
+print_items: print_item
+           | print_items SEMICOLON print_item
            ;
 
-outputs: output { printf("Output is %s\n", $1); free($1); }
-       | outputs SEMICOLON output { printf("Output is %s\n", $3); free($3); }
-       ;
-
-output: STRING
-      | IDENTIFIER
-      ;
-
+print_item: STRING { printf("Printed string: %s\n", $1); free($1); }
+          | IDENTIFIER { printf("Printed variable: %s\n", $1); free($1); }
+          ;
 %%
-
-void yyerror(const char *s) {
-    fprintf(stderr, "Error: %s\n", s);
-}
-
-int main() {
-    yyparse();
-    return 0;
-}
