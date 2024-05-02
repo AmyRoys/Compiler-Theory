@@ -5,6 +5,31 @@
 
 extern int yylex();
 void yyerror(const char *s);
+
+typedef struct{
+    char* identifier; 
+    int value; 
+}Symbol; 
+
+Symbol* symbolTable = NULL; 
+int symbol_table_size = 0;
+
+void add_symbol(char* identifier, int value){
+    symbol_table = realloc(symbol_table, (symbol_table_size + 1) * sizeof(Symbol));
+    symbol_table[symbol_table_size].identifier = strdup(identifier);
+    symbol_table[symbol_table_size].value = value; 
+    symbol_table_size++;
+}
+
+int get_symbol_value(char* identifier){
+    for(int i =0; i < symbol_table_size; i++){
+        if(strcmp(symbol_table[i].identifier, identifier) == 0){
+            return symbol_table[i].value; 
+        }
+    }
+    printf("Error: symbol %s not found\n", identifier);
+    exit(1); 
+}
 %}
 
 %union {
@@ -16,7 +41,7 @@ void yyerror(const char *s);
 %token <str> IDENTIFIER
 %token <num> INTEGER
 %token <str> STRING
-%token BEGINNING END BODY MOVE ADD TO INPUT PRINT SEMICOLON DOT QUESTION_MARK PLUS EQUALS
+%token BEGINNING END BODY MOVE ADD TO INPUT PRINT SEMICOLON DOT QUESTION_MARK PLUS EQUALS NEWLINE
 
 %%
 
@@ -32,13 +57,13 @@ declaration: CAPACITY IDENTIFIER INTEGER DOT { printf("Declared variable %s with
             ;
 
 statements: /* empty string */
-          | statements statement
+          | statements statement NEWLINE
           ;
 
 statement: BEGINNING DOT { printf("Beginning\n"); }
          | CAPACITY IDENTIFIER DOT { printf("Declared variable %s\n", $2); free($2); }
          | BODY DOT { printf("Body\n"); }
-         | INPUT IDENTIFIER DOT { printf("Input to variable: %s\n", $2); free($2); }
+         | INPUT IDENTIFIER DOT { printf("Input to variable: %s\n", $2); fflush(stdin); int value; scanf("%d", &value); add_symbol($2, value); free($2); }
          | MOVE INTEGER TO IDENTIFIER DOT { printf("Moved value to %s\n", $4); free($4); }
          | ADD IDENTIFIER TO IDENTIFIER DOT { printf("Added value to %s\n", $4); free($4); }
          | print_statement
