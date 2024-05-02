@@ -49,10 +49,14 @@ print_statement: PRINT print_items DOT { printf("Printed items\n"); }
                ;
 
 print_items: print_item
-           | print_items SEMICOLON print_item
+           | print_items print_item
            ;
 
 print_item: STRING { printf("Printed string: %s\n", $1); free($1); }
           | IDENTIFIER { printf("Printed variable: %s\n", $1); free($1); }
+          | PLUS { printf("Printed plus\n"); }
+          | EQUALS { printf("Printed equals\n"); }
+          | QUESTION_MARK { printf("Printed question mark\n"); }
+          ;
           ;
 %%
